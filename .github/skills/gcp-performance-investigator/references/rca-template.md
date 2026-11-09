@@ -1,45 +1,29 @@
-# Performance Investigation Report
+# Quick Execution Performance Report (v1.2)
 
-## Investigation
-- Environment:
-- GCP Project (identifier may be redacted in shared report):
-- Input: Request ID / Time range:
-- Timezone and UTC window:
-- Query scope and limits:
-- Schema fields confirmed:
+Keep the report short: one summary and one timeline per execution, with a shared brief comparison if multiple executions were requested.
 
-## Executive summary
-- Symptom:
-- Observed impact:
-- Primary finding:
-- Confidence: High / Medium / Low
+## Scope
+Environment | Local and UTC window | Correlation tuple(s) | Query count, caps and completeness
 
-## End-to-end timeline
-| Time (UTC) | Service | Event | Status | Measured duration | Evidence |
-|---|---|---|---|---|---|
-| | | | | Unknown unless supported | |
+## Execution summary
+| Execution / attempt | Outcome | E2E duration (evidence) | Slowest supported operation | Confidence |
+|---|---|---|---|---|
 
-## Latency and error analysis
-- End-to-end latency (source and method):
-- Longest supported stage:
-- Overlapping stages / gaps:
-- HTTP status and error:
-- Retry, timeout, reset, OOM or tool discovery evidence:
+## Execution flow
+| Time | Microservice | What happened | Measured duration | Status / evidence |
+|---|---|---|---|---|
 
-## Root cause assessment
-- Observed facts:
-- Most likely explanation:
-- Alternative explanations:
-- Missing evidence / unknowns:
-- Confidence rationale:
+## Bottleneck and explanation
+- **Top measured bottleneck:** service, operation, duration and exact evidence; if unknown, say so.
+- **Why slow / failed:** supported reason, or "not established".
+- **Unattributed interval:** timestamp range and size, explicitly an observation gap, not service runtime.
+- **Error chain:** source error → retries → final status, only if evidenced.
 
-## Recommendations
-| Priority | Action | Supporting evidence |
-|---|---|---|
-| | | |
+## Option B follow-up
+State whether the one extra query was used, what it targeted, what it found, and why investigation stopped.
 
-## Evidence index
-Provide timestamps, service names, sanitized message excerpts, and query filters. Avoid raw sensitive payloads and credentials.
+## Next actions
+At most two concrete actions, only when warranted. No generic lengthy recommendations.
 
-## Limitations
-Logs-only timeline; missing start/end events, incomplete correlation, sampling and query caps must be stated explicitly.
+## Safety and evidence
+Use sanitized field names, timestamps, counts and query scope; no raw payloads or secrets. Flag truncation, sampling, ambiguous IDs, and missing lifecycle events.
