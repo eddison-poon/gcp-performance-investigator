@@ -18,3 +18,6 @@ Lightweight, read-only GitHub Copilot agent + skill for investigating Agent Hub 
 - Logs-only reconstruction is not distributed tracing. Unknown durations and root causes are explicitly marked.
 - No deployment, IAM change, Jira update, script execution or resource mutation is in scope.
 - Follow company policies for processing sensitive production logs with AI.
+
+## v1.1 Cloud Trace discovery
+The investigator can now check Cloud Trace command availability and, where supported and approved, retrieve traces read-only. It never enables APIs or changes IAM. See `.github/skills/gcp-performance-investigator/references/cloud-trace.md`. If no approved retrieval method is available, the result is **unknown/unsupported**, not proof tracing is disabled.
