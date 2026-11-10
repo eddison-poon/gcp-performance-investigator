@@ -40,3 +40,13 @@ th{background:#f0f4f9}small,.muted{color:#526074}@media print{body{background:wh
 <section class="panel"><h2>Conclusion</h2></section>
 <footer><small>Coverage and evidence limitations</small></footer></body></html>
 ```
+
+## Required latency breakdown panel
+Place immediately after the summary and before the timeline.
+- Show total measured E2E/handler duration in large type, with the source of the metric.
+- Show a **horizontal bar comparison**: one full-width parent E2E reference bar and separate child-operation bars, scaled to that same E2E duration. Each row must name the microservice and operation, measured milliseconds/seconds, and optional percentage `child_ms / E2E_ms * 100` labelled **individual comparison, not additive share**.
+- Display top 5 measured child operations in Extended Mode (3 Quick). Do not combine nested/parallel timings or imply their percentages sum to 100%.
+- Show the largest observation gap(s) in a separate panel with start/end times, elapsed interval, and **Unattributed — not measured service duration**. Do not color this as confirmed idle, network, queue or LLM time.
+- Include a compact service breakdown table with Service | Operation | Measured duration | E2E comparison % | Evidence/confidence. Include Unknown rows for key stages lacking duration.
+- A true 100% stacked timeline is permitted **only if** validated, non-overlapping intervals partition the entire parent execution; otherwise never compute a residual as `E2E - sum(children)`.
+- Inline CSS only; accessible text labels and print-friendly rendering. Ensure any percentages use consistent units and validated scope.
