@@ -12,3 +12,6 @@ Use the same findings in chat and HTML. Keep text short.
 8. **Conclusion:** one or two evidence-based sentences, confidence, and up to two next actions.
 
 Generate standalone HTML following [html-report.md](html-report.md) by default. No raw logs, secrets or full identifiers.
+
+## Latency breakdown (required)
+Include parent E2E duration as separate reference; list measured child operations by service/operation with durations and individual E2E comparison percentages. Add largest observation gaps separately. Do not sum overlapping children, subtract them from E2E to fabricate unexplained time, or classify log silence as a measured operation. HTML must render a labeled horizontal comparison chart and corresponding table.
