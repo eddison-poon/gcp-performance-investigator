@@ -45,3 +45,10 @@ Reconstruct what happened across microservices, measured durations, errors, majo
 - Medium: scoped correlation with incomplete operation semantics.
 - Low/Unknown: missing boundaries, log gaps, ambiguous identities, text-only occurrences.
 - Explain data completeness separately from causal confidence.
+
+## Latency breakdown requirement
+- Include a dedicated **Latency Breakdown** section in both chat summary and HTML. Present (a) E2E parent duration, (b) top measured child operations grouped by service/operation, and (c) important observation gaps with timestamps and confidence.
+- Show **duration in ms/s** and **percentage of E2E** for each child only as an individual comparison, not as additive shares. Overlapping or nested operations must never be summed or represented as a partition of E2E.
+- Render a horizontal duration comparison chart using CSS (no JS): parent E2E as a separate reference bar, and measured children as individual bars on the same scale. Observation gaps must be shown separately with distinct labels and no implication that they are confirmed service processing/waiting time.
+- If validated non-overlapping intervals fully partition an execution, a stacked breakdown is allowed; otherwise do **not** show an attributed/unattributed 100% stacked bar or calculate a residual by subtracting potentially overlapping durations.
+- Show Unknown explicitly for unmeasured operations; highlight the largest uninstrumented interval as an observability finding rather than a confirmed bottleneck.
