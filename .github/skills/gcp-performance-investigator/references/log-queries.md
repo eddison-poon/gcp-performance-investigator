@@ -1,40 +1,36 @@
-# Quick Cloud Logging queries (PowerShell / gcloud)
+# GCP Cloud Logging query patterns — v1.3
 
-All queries must use an explicit project, bounded UTC timestamps, and a limit. Field names below are examples: use only paths observed in the target environment. Prefer PowerShell single-quoted filter strings; replace placeholders before execution.
+Use actual discovered fields; these are **templates**, not guaranteed schemas. All filters require explicit project and UTC bounds. PowerShell examples:
 
-## Preflight (read-only)
 ```powershell
 gcloud --version
 gcloud auth list
 gcloud config get-value project
-```
-Default project is informational only.
-
-## Optional schema probe (only if mapping unknown)
-```powershell
-gcloud logging read 'timestamp>="START_UTC" AND timestamp<"END_UTC"' --project="PROJECT_ID" --limit=10 --format=json
-```
-
-## Primary exact correlation (choose a validated key)
-```powershell
 gcloud logging read 'timestamp>="START_UTC" AND timestamp<"END_UTC" AND jsonPayload.correlation_id="CORRELATION_ID"' --project="PROJECT_ID" --limit=200 --format=json --order=asc
 ```
-Alternative verified fields: `jsonPayload.query_name`, `jsonPayload.execution_id`, `jsonPayload.request_id`, `trace`. For multiple IDs, use verified fields and conjunction only if they coexist in relevant logs; otherwise retrieve one key and validate secondary IDs in results. Avoid an AND filter that silently excludes services lacking one field.
 
-## One targeted follow-up (Option B)
-Use a narrow service/namespace/cluster filter plus exact validated secondary identifier **or** the unexplained interval, never a broad project-wide dump. Example template:
+Use `jsonPayload.query_name`, `jsonPayload.execution_id`, `jsonPayload.request_id` or `trace` only when validated. AND filters can accidentally omit services that lack a field. Use the most selective confirmed key and verify adjacent IDs after retrieval.
+
+## Adaptive slicing
+1. Convert the bounded user window to UTC once.
+2. Partition into consecutive 2-minute intervals with no overlap or holes: `timestamp >= START` and `timestamp < END`.
+3. Query each interval with same validated project and key filter, `--limit=200 --format=json --order=asc`.
+4. For each result of **200**, bisect interval and query both children; do not use the capped parent as complete coverage.
+5. Count **all** returned records toward 5,000, including parent queries and duplicates; count all logging reads toward 30. Stop on budget exhaustion.
+6. Deduplicate final records; prefer `logName`, resource identity, `insertId`; do not assume `insertId` globally unique. If unavailable, use an explicitly documented stable composite and mark uncertainty.
+7. If a very narrow interval still saturates, report incomplete coverage; do not loop indefinitely.
+8. Show total query count, total records returned, unique records, uncovered/saturated slices, and whether start/end lifecycle events were observed. Under-cap slices mean only the query filter was not capped, **not** proof all execution logs exist.
+
+## Option B targeted follow-up
+Only after primary or adaptive coverage, one targeted read per execution if necessary, within budgets:
 ```powershell
 gcloud logging read 'timestamp>="GAP_START_UTC" AND timestamp<"GAP_END_UTC" AND resource.type="k8s_container" AND resource.labels.container_name="CONFIRMED_SERVICE"' --project="PROJECT_ID" --limit=200 --format=json --order=asc
 ```
-Before attributing any result, validate matching execution/trace/call identity; unrelated events in the same interval are not evidence.
+Validate identity independently for records missing original correlation key. Do not equate proximity with causation.
 
-## Short-window incident mode
-Use verified numeric HTTP status fields (e.g. `httpRequest.status` or `jsonPayload.http_status`) or confirmed error event names. Keep the same query budget and report sampling.
-
-## Rules adapted from Agent Hub observability
-- Use `correlation_id` + `query_name` + `execution_id` where available to distinguish execution attempts, not as interchangeable universal IDs.
-- Controller lifecycle may be in `jsonPayload.msg`; executor boundary may use `event_name`, `http_path=/execute`, `http_status`, `latency_ms`. Validate schema first.
-- For tool/MCP pairs, require scoped tool-call/RPC IDs and compatible pod/connection identity.
-- Controller failure may take precedence over later successful wrapper HTTP status.
-- Do not add overlapping child timings, average p95s, or treat log gaps as service durations.
-- Do not claim absence of errors/events when queries hit limits.
+## Semantics
+- Controller `jsonPayload.msg`, executor `event_name`, `http_path`, `http_status`, `latency_ms` are candidates only.
+- Use `execution_id` to distinguish attempts; for tool/MCP pairs validate call ID plus connection/pod scope.
+- Controller failures can precede later successful HTTP wrappers.
+- Do not sum overlapping child operations, or call log silence measured service duration.
+- Avoid sensitive raw payloads in outputs and saved reports.
