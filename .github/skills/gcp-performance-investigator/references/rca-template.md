@@ -1,29 +1,14 @@
-# Quick Execution Performance Report (v1.2)
+# Compact RCA contract — v1.3
 
-Keep the report short: one summary and one timeline per execution, with a shared brief comparison if multiple executions were requested.
+Use the same findings in chat and HTML. Keep text short.
 
-## Scope
-Environment | Local and UTC window | Correlation tuple(s) | Query count, caps and completeness
+1. **Scope and coverage:** environment, local/UTC window, redacted execution identifier, Quick/Extended mode, queries, returned and unique records, capped/uncovered intervals, observed start/end.
+2. **Execution summary:** observed outcome, measured E2E/handler duration and confidence; distinguish accepted HTTP 202 from final success.
+3. **Timeline:** chronological time, service, operation, measured duration or Unknown, status/evidence.
+4. **Slow operations:** top three (Quick) or top five (Extended) **measured child** operations. Show parent E2E separately. Never add overlapping durations.
+5. **Latency attribution:** strongest supported bottleneck; if internal work cannot be measured, say "Unattributed interval", not a confirmed slow microservice. State observation gap boundaries and length.
+6. **Error chain:** originating failure -> retries -> terminal status, if supported.
+7. **Option B:** whether one targeted follow-up was used, its scope and result.
+8. **Conclusion:** one or two evidence-based sentences, confidence, and up to two next actions.
 
-## Execution summary
-| Execution / attempt | Outcome | E2E duration (evidence) | Slowest supported operation | Confidence |
-|---|---|---|---|---|
-
-## Execution flow
-| Time | Microservice | What happened | Measured duration | Status / evidence |
-|---|---|---|---|---|
-
-## Bottleneck and explanation
-- **Top measured bottleneck:** service, operation, duration and exact evidence; if unknown, say so.
-- **Why slow / failed:** supported reason, or "not established".
-- **Unattributed interval:** timestamp range and size, explicitly an observation gap, not service runtime.
-- **Error chain:** source error → retries → final status, only if evidenced.
-
-## Option B follow-up
-State whether the one extra query was used, what it targeted, what it found, and why investigation stopped.
-
-## Next actions
-At most two concrete actions, only when warranted. No generic lengthy recommendations.
-
-## Safety and evidence
-Use sanitized field names, timestamps, counts and query scope; no raw payloads or secrets. Flag truncation, sampling, ambiguous IDs, and missing lifecycle events.
+Generate standalone HTML following [html-report.md](html-report.md) by default. No raw logs, secrets or full identifiers.
